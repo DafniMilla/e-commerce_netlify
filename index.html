@@ -329,23 +329,28 @@ background: linear-gradient(135deg, rgba(168, 224, 99, 0.8), rgba(255, 175, 204,
     }
 
     // 2. Pagamento
-    setStep('pagamento', 'loading', 'Autorizando pagamento...', 'Em andamento');
-    setProgress(55);
-    await esperar(800);
+    
+setStep('pagamento', 'loading', 'Autorizando pagamento...', 'Em andamento');
+setProgress(55);
+await esperar(800);
 
-    try {
-      const r2 = await fetch('/.netlify/functions/pagamento');
-      const d2 = await r2.json();
-      await esperar(600);
-      setStep('pagamento', 'done', d2.mensagem || 'Pagamento aprovado', 'Concluído');
-      setProgress(78);
-    } catch (e) {
-      setStep('pagamento', 'error', 'Falha ao processar o pagamento', 'Erro');
-      document.getElementById('final-msg').textContent = 'Processo interrompido. Tente novamente.';
-      btn.disabled = false;
-      btn.textContent = 'Tentar novamente';
-      return;
-    }
+try {
+  const r2 = await fetch('/.netlify/functions/pagamento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ valor: Number(valor) })
+  });
+  const d2 = await r2.json();
+  await esperar(600);
+  setStep('pagamento', 'done', d2.mensagem || 'Pagamento aprovado', 'Concluído');
+  setProgress(78);
+} catch (e) {
+  setStep('pagamento', 'error', 'Falha ao processar o pagamento', 'Erro');
+  document.getElementById('final-msg').textContent = 'Processo interrompido. Tente novamente.';
+  btn.disabled = false;
+  btn.textContent = 'Tentar novamente';
+  return;
+}
 
     // 3. Notificação
     setStep('notificacao', 'loading', 'Enviando confirmação...', 'Em andamento');
